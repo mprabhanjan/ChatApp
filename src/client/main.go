@@ -43,6 +43,7 @@ func main() {
     helloMsg := &pb.Hello{
         ClientVer: "Version_1",
         Https:     false,
+        UserName: fmt.Sprintf("MP#%s", time.Now()),
     }
     clientHello := &pb.ClientToServerMessage{
         ClientMessage: &pb.ClientToServerMessage_HelloMsg{HelloMsg: helloMsg},
@@ -80,7 +81,7 @@ func receiveFromServer(srvrStm pb.ChatRpcSrvc_ChatClient, stopChan chan struct{}
         switch msg := respMsg.ServerMsg.(type) {
         case *pb.ServerToClientMessage_HelloAck:
             helloAck := msg.HelloAck
-            fmt.Fprint(&buf, "MsgType: HelloAck, Server-Ver %s, Client_Id: %s",
+            fmt.Fprintf(&buf, "MsgType: HelloAck, Server-Ver %s, Client_Id: %s\n",
                 helloAck.GetServerVer(), helloAck.GetClientId())
 
         case *pb.ServerToClientMessage_MsgAck:
@@ -91,7 +92,7 @@ func receiveFromServer(srvrStm pb.ChatRpcSrvc_ChatClient, stopChan chan struct{}
             } else {
                 ackStr = "NACK"
             }
-            fmt.Fprint(&buf, "MsgType: MsgAck, Status: %s", ackStr)
+            fmt.Fprintf(&buf, "MsgType: MsgAck, Status: %s\n", ackStr)
 
         case *pb.ServerToClientMessage_CloseAck:
             msgAck := msg.CloseAck
@@ -101,7 +102,7 @@ func receiveFromServer(srvrStm pb.ChatRpcSrvc_ChatClient, stopChan chan struct{}
             } else {
                 ackStr = "NACK"
             }
-            fmt.Fprint(&buf, "MsgType: CloseAck, Status: %s", ackStr)
+            fmt.Fprintf(&buf, "MsgType: CloseAck, Status: %s\n", ackStr)
             sendStop = true
 
         case *pb.ServerToClientMessage_ClientMsg:
@@ -110,7 +111,7 @@ func receiveFromServer(srvrStm pb.ChatRpcSrvc_ChatClient, stopChan chan struct{}
             if chatMsg.GetBroadcast() {
                 bcast = "B"
             }
-            fmt.Fprint(&buf, "Client Msg from %s(%s): %s", chatMsg.GetFromClient(), bcast, chatMsg.GetMessage())
+            fmt.Fprintf(&buf, "Client Msg from %s(%s): %s\n", chatMsg.GetFromClient(), bcast, chatMsg.GetMessage())
         }
 
         //Send to Stdout
