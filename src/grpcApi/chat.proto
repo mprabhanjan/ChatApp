@@ -1,0 +1,70 @@
+/*
+ * Defines RPC for the Chat application
+ */
+syntax = "proto3";
+package ChatRpc;
+
+message Hello {
+  string client_ver         = 1;
+  bool   https              = 2;
+  string user_name          = 3;
+  string opaque_client_data = 4;
+}
+
+message HelloAck {
+  string server_ver         = 1;
+  bool https                = 2;
+  string client_id          = 3;
+  string opaque_client_data = 4;
+}
+
+message ClientChatMessage {
+  string message_text       = 1;
+  string to_client_name     = 2;
+  bool   broadcast          = 3;
+  string opaque_client_data = 4;
+}
+
+message ClientChatMessageAck {
+  bool msg_ack              = 1; // true=ack; false=nack
+  string opaque_client_data = 2;
+}
+
+message ClientClose {
+  string client_id          = 3;
+  string opaque_client_data = 4;
+}
+
+message ClientCloseAck {
+  bool close_ack            = 1;
+  string opaque_client_data = 2;
+}
+
+message ClientToServerMessage {
+  oneof ClientMessage {
+    Hello hello_msg           = 1;
+    ClientChatMessage new_msg = 2;
+    ClientClose close_msg     = 3;
+  }
+}
+
+message ServerClientChatMessage {
+  string from_client = 1;
+  bool   broadcast   = 2;
+  string message     = 3;
+}
+
+message ServerToClientMessage {
+  oneof ServerMsg {
+    HelloAck    hello_ack              = 1;
+    ClientChatMessageAck msg_ack       = 2;
+    ServerClientChatMessage client_msg = 3;
+    ClientCloseAck  close_ack          = 4;
+  }
+}
+
+
+// Chat RPC Server
+service ChatRpcSrvc {
+  rpc Chat (stream ClientToServerMessage) returns (stream ServerToClientMessage) {}
+}
